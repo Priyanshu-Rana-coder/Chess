@@ -1,5 +1,5 @@
 import copy
-White_queen_rook,White_king_rook,Black_Queen_rook,Black_King_rook=True,True,True,True
+TLR,TRR,BLR,BRR=True,True,True,True #Top left rook, top right rook etc. This is for allowing castle
 def ally_pieces(white):
     return "♔♕♗♘♙♖" if white else "♚♛♞♝♟♜"
 def print_board(board):
@@ -45,42 +45,42 @@ def horse_move(board,x1,y1,x2,y2,white):
         board[x1][y1],board[x2][y2]=" ",board[x1][y1]
         return
 def castle(board,x1,y1,x2,y2,white):
-    global White_queen_rook ,White_king_rook,Black_Queen_rook,Black_King_rook
+    global TLR ,TRR,BLR,BRR
     s1=ally_pieces(white)
     # this allows castle if no piece between rook and king and if no attacking piece is attacking any square
     if not white:
-        if x1==7 and y1==4 and x2==7 and y2==6 and Black_Queen_rook and Black_King_rook and board[7][5]==" " and board[7][6]==" ":
+        if x1==7 and y1==4 and x2==7 and y2==6 and BLR and BRR and board[7][5]==" " and board[7][6]==" ":
             temp=copy.deepcopy(board)
             temp[7][4],temp[7][5],temp[7][6],temp[7][7]=" "," "," "," "
             if not act_check(temp,white,7,4) and not act_check(temp,white,7,5) and not act_check(temp,white,7,6):
                 board[7][4],board[7][5],board[7][6],board[7][7]=" "," "," "," "
                 board[7][6],board[7][5]= "♚","♜"
-                Black_Queen_rook,Black_King_rook=False,False
+                BLR,BRR=False,False
                 return
-        elif x1==7 and y1==4 and x2==7 and y2==2 and White_queen_rook and White_king_rook and board[7][3]==" " and board[7][2]==" " and board[7][1]==" ":
+        elif x1==7 and y1==4 and x2==7 and y2==2 and TLR and TRR and board[7][3]==" " and board[7][2]==" " and board[7][1]==" ":
             temp=copy.deepcopy(board)
             temp[7][4],temp[7][3],temp[7][2],temp[7][1]=" "," "," "," "
             if not act_check(temp,white,7,4) and not act_check(temp,white,7,3) and not act_check(temp,white,7,2):
                 board[7][4],board[7][3],board[7][2],board[7][0]=" "," "," "," "
                 board[7][2],board[7][3]= "♚","♜"
-                White_queen_rook,White_king_rook=False,False
+                TLR,TRR=False,False
                 return
     else:
-        if x1==0 and y1==4 and x2==0 and y2==6 and Black_Queen_rook and Black_King_rook and board[0][5]==" " and board[0][6]==" ":
+        if x1==0 and y1==4 and x2==0 and y2==6 and BLR and BRR and board[0][5]==" " and board[0][6]==" ":
             temp=copy.deepcopy(board)
             temp[0][4],temp[0][5],temp[0][6],temp[0][7]=" "," "," "," "
             if not act_check(temp,white,0,4) and not act_check(temp,white,0,5) and not act_check(temp,white,0,6):
                 board[0][4],board[0][5],board[0][6],board[0][7]=" "," "," "," "
                 board[0][6],board[0][5]= "♔","♖"
-                Black_Queen_rook,Black_King_rook=False,False
+                BLR,BRR=False,False
                 return
-        elif x1==0 and y1==4 and x2==0 and y2==2 and Black_Queen_rook and White_queen_rook and board[0][3]==" " and board[0][2]==" " and board[0][1]==" ":
+        elif x1==0 and y1==4 and x2==0 and y2==2 and BLR and TLR and board[0][3]==" " and board[0][2]==" " and board[0][1]==" ":
             temp=copy.deepcopy(board)
             temp[0][4],temp[0][3],temp[0][2],temp[0][1]=" "," "," "," "
             if not act_check(temp,white,0,4) and not act_check(temp,white,0,3) and not act_check(temp,white,0,2):
                 board[0][4],board[0][3],board[0][2],board[0][0]=" "," "," "," "
                 board[0][2],board[0][3]= "♔","♖"
-                Black_Queen_rook,White_queen_rook=False,False
+                BLR,TLR=False,False
                 return
 def rook_move(board,x1,y1,x2,y2,white):
     s1=ally_pieces(white)
@@ -99,18 +99,6 @@ def rook_move(board,x1,y1,x2,y2,white):
             break
         if board[prex][prey] !=" ":
             return
-    if x1==0 and y1==0:
-        global White_queen_rook
-        White_queen_rook=False
-    elif x1==0 and y1==7:
-        global White_king_rook
-        White_king_rook=False
-    elif x1==7 and y1==0:
-        global Black_Queen_rook
-        Black_Queen_rook=False
-    elif x1==7 and y1==7:
-        global Black_King_rook
-        Black_King_rook=False
     board[x1][y1],board[x2][y2]=" ",board[x1][y1]
 def bishop_move(board,x1,y1,x2,y2,white):
     prex=x1
@@ -142,11 +130,11 @@ def king_move(board,x1,y1,x2,y2,white):
     if [abs(x2-x1),abs(y2-y1)] in [[1,0],[1,1],[0,1]] and board[x2][y2] not in s1:
         board[x1][y1],board[x2][y2]=" ",board[x1][y1]
         if white:
-            global White_queen_rook,White_king_rook
-            White_queen_rook,White_king_rook=False,False
+            global TLR,TRR
+            TLR,TRR=False,False
         else:
-            global Black_Queen_rook,Black_King_rook
-            Black_Queen_rook,Black_King_rook=False,False
+            global BLR,BRR
+            BLR,BRR=False,False
         return
     if x1==x2 and abs(y2-y1)==2:
         castle(board,x1,y1,x2,y2,white)
