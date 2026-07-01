@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/login.css">
+    <title>Chess Arena</title>
+</head>
+<body>
+    <div class="full_body">
+        <div class="titles">
+            <h1>♔ Chess Arena ♔</h1>
+            <p>Play chess in real time.</p>
+            <hr>
+            <h2>Select Game Mode</h2>
+        </div>
+        <div class="mode_select_btn">
+            <button id="pvp-btn" class="play_btn">
+                Player vs Player
+            </button>
+            <button id="bot-btn" disabled class="play_btn">
+                Player vs Bot (Coming Soon)
+            </button>
+        </div>
+    </div>
+    <script>
+        document.getElementById("pvp-btn").addEventListener("click", function () {
+            window.location.href = "/lobby";
+        });
+    </script>
+</body>
+</html>
