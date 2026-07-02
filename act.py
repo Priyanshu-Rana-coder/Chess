@@ -1,49 +1,4 @@
 import copy
-White_queen_rook,White_king_rook,Black_Queen_rook,Black_King_rook=True,True,True,True
-
-
-
-
-
-
-
-
-
-
-White_turn=True
-board=[["♖","♘","♗","♕","♔","♗","♘","♖"],["♙","♙","♙","♙","♙","♙","♙","♙"],[" "," "," "," "," "," "," "," "],[" "," "," "," "," "," "," "," "],[" "," "," "," "," "," "," "," "],[" "," "," "," "," "," "," "," "],["♟","♟","♟","♟","♟","♟","♟","♟"],["♜","♞","♝","♛","♚","♝","♞","♜"]]
-pieces_list=["♟","♙","♞","♘","♜","♖","♝","♗","♛","♕","♚","♔"]
-moves_list=[pawn_move,horse_move,rook_move,bishop_move,queen_move,king_move]
-while True:
-    print_board(board)
-    if White_turn:
-        print("------------------------------------------------------------------------------------------------")
-        print("White's turn")
-        print("------------------------------------------------------------------------------------------------")
-    else:
-        print("------------------------------------------------------------------------------------------------")
-        print("Black's turn")
-        print("------------------------------------------------------------------------------------------------")
-    x1=int(input("Type row from"))
-    y1=int(input("Type coloumn from"))
-    x2=int(input("Type row to"))
-    y2=int(input("Type coloumn to"))
-    secondary_board=copy.deepcopy(board)
-    if board[x1][y1] in pieces_list:
-        white=False
-        if pieces_list.index(board[x1][y1])%2:
-            white=True
-        moves_list[(pieces_list.index(board[x1][y1]))//2](board,x1,y1,x2,y2,white)
-        check(board)
-        if check(board):
-            print("Check")
-        if board!=secondary_board:
-            White_turn= not White_turn
-    else:
-        print("Not found")
-        break
-
-
 class Game:
     def __init__(self):
         self.board = [["♖","♘","♗","♕","♔","♗","♘","♖"],["♙","♙","♙","♙","♙","♙","♙","♙"],[" "," "," "," "," "," "," "," "],[" "," "," "," "," "," "," "," "],[" "," "," "," "," "," "," "," "],[" "," "," "," "," "," "," "," "],["♟","♟","♟","♟","♟","♟","♟","♟"],["♜","♞","♝","♛","♚","♝","♞","♜"]]
@@ -53,6 +8,22 @@ class Game:
         self.Black_queen_rook = True
         self.Black_king_rook = True
         self.undo_stack=[]
+        self.pieces_list=["♟","♙","♞","♘","♜","♖","♝","♗","♛","♕","♚","♔"]
+        self.moves_list=[self.pawn_move,self.horse_move,self.rook_move,self.bishop_move,self.queen_move,self.king_move]
+    def move(self,x1,y1,x2,y2):
+        board=self.board
+        secondary_board=copy.deepcopy(board)
+        if board[x1][y1] in self.pieces_list:
+            white=False
+            if self.pieces_list.index(board[x1][y1])%2:
+                white=True
+            self.moves_list[(self.pieces_list.index(board[x1][y1]))//2](board,x1,y1,x2,y2,white)
+            if self.check():
+                print("Check")
+            if board!=secondary_board:
+                self.white_turn= not self.white_turn
+        else:
+            print("Not found")
     def ally_pieces(self,white):
         return "♔♕♗♘♙♖" if white else "♚♛♞♝♟♜"
     def print_board(self):
@@ -211,7 +182,7 @@ class Game:
             for j in range(8):
                 if board[i][j] in self.ally_pieces(not white):
                     temp = copy.deepcopy(board)
-                    moves_list[(pieces_list.index(board[i][j]))//2](temp,i,j,x,y,not white)
+                    self.moves_list[(self.pieces_list.index(board[i][j]))//2](temp,i,j,x,y,not white)
                     if temp[x][y]!=board[x][y]:
                         return True
         return False
