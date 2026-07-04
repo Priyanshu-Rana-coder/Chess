@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Arena</title>
+    <link rel="stylesheet" href="room.css">
+</head>
+<body>
+
+<div class="dashboard">
+
+    <h1>♔ Chess Arena</h1>
+
+    <div class="profile">
+
+        <h2 id="username">Priyanshu</h2>
+
+        <div class="stats">
+            <p>Wins : <span id="wins">0</span></p>
+            <p>Losses : <span id="losses">0</span></p>
+            <p>Draws : <span id="draws">0</span></p>
+        </div>
+
+    </div>
+
+    <div class="room-box">
+
+        <h3>Create Room</h3>
+
+        <input
+            type="text"
+            id="created-room"
+            readonly
+            placeholder="Room ID"
+        >
+
+        <button id="create-room-btn">
+            Create Room
+        </button>
+
+    </div>
+
+    <div class="room-box">
+
+        <h3>Join Room</h3>
+
+        <input
+            type="text"
+            id="join-room"
+            placeholder="Enter Room ID"
+        >
+
+        <button id="join-room-btn">
+            Join Room
+        </button>
+
+    </div>
+
+</div>
+
+<script src="dashboard.js"></script>
+
+</body>
+</html>
