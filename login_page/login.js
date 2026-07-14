@@ -25,12 +25,7 @@ form.addEventListener("submit", async function (event) {
             return;
         }
         // Store user information
-        sessionStorage.setItem("username", data.username);
-        sessionStorage.setItem("wins", data.wins);
-        sessionStorage.setItem("losses", data.losses);
-        sessionStorage.setItem("draws", data.draws);
-        // Store JWT
-        sessionStorage.setItem("token", data.token);
+        sessionStorage.setItem("user", JSON.stringify(data));
         // Go to next page
         window.location.href = "../mode_page/mode.html";
     } catch (error) {
