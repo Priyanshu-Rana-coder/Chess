@@ -1,0 +1,6 @@
+user sees the login page
+user types in username and password (if username exists compare password to the hashed password else create a new user and for each user return his stats like username, wins, loss, ties)
+now he lands on the mod page where he has two options either play bot vs player(coming soon) or player vs player and there will be the user stats displayed on top of the window hopefully in a fancy way
+now user clicks on player vs player he is sent to room page here two options either create room or join room. if create room push the user to a freshly created room and give him white as his pieces with the game room id dislayed on top.
+now if user clicks on join room he has to type in a valid room id which backend checks and if valid id found starts the match and locks the users by taking there JWT tokens now if a new user wants to cheat his way through he needs the jwt token 
+now let them play normally and once the game ends like when checkmate=True or stalemate=True the game ends and users stats are changed in database so the next time they login the stats have been changed

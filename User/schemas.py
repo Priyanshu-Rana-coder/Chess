@@ -8,3 +8,4 @@ class UserResponse(BaseModel):
     wins: int
     losses: int
     draws: int
+    token: str
