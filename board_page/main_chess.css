@@ -21,7 +21,28 @@ h1{
     letter-spacing: 2px;
     font-size: 50px;
 }
+#room-id {
+    margin-top: -10px;
+    margin-bottom: 20px;
+    text-align: center;
 
+    font-size: 20px;
+    font-weight: bold;
+    color: #f5d76e;
+
+    background-color: rgba(255, 255, 255, 0.08);
+
+    display: inline-block;
+
+    padding: 8px 18px;
+
+    border: 2px solid #f5d76e;
+    border-radius: 10px;
+
+    letter-spacing: 1px;
+
+    box-shadow: 0 0 8px rgba(245, 215, 110, 0.3);
+}
 .game-container{
     display: flex;
     gap: 40px;
@@ -148,4 +169,15 @@ h1{
 
     line-height: 1.8;
     font-size: 16px;
+}
+.chess-board {
+    transition: transform 0.3s ease;
+}
+
+.chess-board.flipped {
+    transform: rotate(180deg);
+}
+
+.chess-board.flipped .square {
+    transform: rotate(180deg);
 }

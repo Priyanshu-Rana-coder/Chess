@@ -30,16 +30,13 @@ class RoomManager:
 
     def create_room(self, user):
         if user["username"] in self.user_rooms:
-            return None
-
+            room_id = self.user_rooms[user["username"]]
+            return self.rooms[room_id]
         chars = "1234567890qwertyuiopasdfghjklzxcvbnm"
-
         while True:
             new_room_id = ''
-
             for i in range(10):
                 new_room_id += random.choice(chars)
-
             if new_room_id not in self.rooms:
                 self.rooms[new_room_id] = Room(new_room_id, user1=user)
                 self.user_rooms[user["username"]] = new_room_id
@@ -47,20 +44,16 @@ class RoomManager:
 
     def join_room(self, user, room_id):
         if user["username"] in self.user_rooms:
-            return "already"
-
+            existing_room_id = self.user_rooms[user["username"]]
+            return self.rooms[existing_room_id]
         room = self.rooms.get(room_id)
-
         if room is None:
             return None
-
         if room.black is not None:
             return "full"
-
         room.black = user
         room.started = True
         self.user_rooms[user["username"]] = room_id
-
         return room
     
 MANAGER = RoomManager()

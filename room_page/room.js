@@ -7,6 +7,7 @@ document.getElementById("wins").textContent = `🏆 ${user.wins}`;
 document.getElementById("losses").textContent = `❌ ${user.losses}`;
 document.getElementById("draws").textContent = `🤝 ${user.draws}`;
 
+
 const createRoomBtn = document.getElementById("create-room-btn");
 createRoomBtn.addEventListener("click", async function () {
     const response = await fetch("http://127.0.0.1:8000/room/create", {
@@ -18,6 +19,7 @@ createRoomBtn.addEventListener("click", async function () {
     const data = await response.json();
     document.getElementById("created-room").value = data.room_id;
     sessionStorage.setItem("room_id", data.room_id);
+    window.location.href = "../board_page/main_chess.html";
 });
 
 const joinRoomBtn = document.getElementById("join-room-btn");
@@ -35,4 +37,5 @@ joinRoomBtn.addEventListener("click", async function () {
     });
     const data = await response.json();
     sessionStorage.setItem("room_id", roomId);
+    window.location.href = "../board_page/main_chess.html";
 });
