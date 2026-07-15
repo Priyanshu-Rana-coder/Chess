@@ -2,6 +2,8 @@ import bcrypt
 from jose import jwt
 from datetime import datetime, timedelta
 from jose import JWTError
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 def hash_password(password: str) -> str:
     hashed = bcrypt.hashpw(
         password.encode("utf-8"),
@@ -35,3 +37,11 @@ def verify_token(token: str):
         return payload
     except JWTError:
         return None
+security = HTTPBearer()
+
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
+    payload = verify_token(token)
+    if payload is None:
+        raise HTTPException(status_code=401,detail="Invalid or expired token")
+    return payload

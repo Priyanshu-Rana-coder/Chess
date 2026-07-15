@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from User.database import Base, engine
 from User import models
 from User.router import router as user_router
+from room_page.router import router as room_router
 
 app = FastAPI()
 
@@ -11,6 +12,8 @@ Base.metadata.create_all(bind=engine)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "http://127.0.0.1:3000",
+        "http://localhost:3000",
         "http://127.0.0.1:3002",
         "http://localhost:3002",
         "http://127.0.0.1:5500",
@@ -22,3 +25,4 @@ app.add_middleware(
 )
 
 app.include_router(user_router)
+app.include_router(room_router)
