@@ -1,7 +1,8 @@
-from fastapi import APIRouter, WebSocket
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from User.auth import verify_token
 from room_page.room_manager import MANAGER
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from User.database import SessionLocal
+from User.models import User
 
 router = APIRouter()
 
@@ -24,11 +25,9 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str):
     if room.white["username"] == username:
         room.white_socket = websocket
         print("White connected")
-
     elif room.black["username"] == username:
         room.black_socket = websocket
         print("Black connected")
-
     else:
         await websocket.close()
         return
@@ -36,16 +35,103 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str):
     await websocket.send_json({
         "type": "connected"
     })
+
+    db = SessionLocal()
+
     try:
         while True:
             data = await websocket.receive_json()
 
-            if websocket == room.white_socket:
-                if room.black_socket is not None:
-                    await room.black_socket.send_json(data)
+            if room.finished:
+                continue
 
-            elif websocket == room.black_socket:
-                if room.white_socket is not None:
-                    await room.white_socket.send_json(data)
+            if room.game.white_turn and websocket != room.white_socket:
+                continue
+
+            if (not room.game.white_turn) and websocket != room.black_socket:
+                continue
+
+            response = room.game.move(data["from"][0], data["from"][1], data["to"][0], data["to"][1])
+            if room.white_socket is not None:
+                await room.white_socket.send_json(response.model_dump())
+
+            if room.black_socket is not None:
+                await room.black_socket.send_json(response.model_dump())
+
+            if response.checkmate:
+                room.finished = True
+
+                if room.game.white_turn:
+                    winner = room.black["username"]
+                    loser = room.white["username"]
+                else:
+                    winner = room.white["username"]
+                    loser = room.black["username"]
+
+                winner_user = db.query(User).filter(User.username == winner).first()
+                loser_user = db.query(User).filter(User.username == loser).first()
+
+                winner_user.wins += 1
+                loser_user.losses += 1
+
+                db.commit()
+
+                del MANAGER.user_rooms[winner]
+                del MANAGER.user_rooms[loser]
+
+                MANAGER.delete_room(room.room_id)
+                break
+
+            elif response.stalemate:
+                room.finished = True
+
+                white_user = db.query(User).filter(User.username == room.white["username"]).first()
+                black_user = db.query(User).filter(User.username == room.black["username"]).first()
+
+                white_user.draws += 1
+                black_user.draws += 1
+
+                db.commit()
+
+                del MANAGER.user_rooms[room.white["username"]]
+                del MANAGER.user_rooms[room.black["username"]]
+
+                MANAGER.delete_room(room.room_id)
+                break
+
     except WebSocketDisconnect:
+
         print(f"{username} disconnected")
+
+        if room.finished:
+            return
+
+        room.finished = True
+
+        if room.white_socket == websocket:
+            room.white_socket = None
+            winner = room.black["username"]
+            loser = room.white["username"]
+
+        elif room.black_socket == websocket:
+            room.black_socket = None
+            winner = room.white["username"]
+            loser = room.black["username"]
+
+        winner_user = db.query(User).filter(User.username == winner).first()
+        loser_user = db.query(User).filter(User.username == loser).first()
+
+        winner_user.wins += 1
+        loser_user.losses += 1
+
+        db.commit()
+
+        del MANAGER.user_rooms[winner]
+        del MANAGER.user_rooms[loser]
+
+        MANAGER.delete_room(room.room_id)
+
+        print(f"{winner} wins by disconnect")
+
+    finally:
+        db.close()

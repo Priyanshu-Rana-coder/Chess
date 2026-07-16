@@ -141,35 +141,10 @@ h1{
 .resign{
     background: #8b2020;
 }
-
 .resign:hover{
     background: #b62929;
 }
 
-.history-box{
-    margin-top: 20px;
-
-    background: #2b1d13;
-
-    border-radius: 10px;
-    padding: 15px;
-
-    height: 320px;
-}
-
-.history-box h3{
-    margin-bottom: 12px;
-    text-align: center;
-}
-
-#move-history{
-    overflow-y: auto;
-
-    height: 260px;
-
-    line-height: 1.8;
-    font-size: 16px;
-}
 .chess-board {
     transition: transform 0.3s ease;
 }

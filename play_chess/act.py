@@ -1,5 +1,7 @@
 import copy
+from .schema import MoveResponse
 class Game:
+    
     def __init__(self):
         self.board = [["♖","♘","♗","♕","♔","♗","♘","♖"],["♙","♙","♙","♙","♙","♙","♙","♙"],[" "," "," "," "," "," "," "," "],[" "," "," "," "," "," "," "," "],[" "," "," "," "," "," "," "," "],[" "," "," "," "," "," "," "," "],["♟","♟","♟","♟","♟","♟","♟","♟"],["♜","♞","♝","♛","♚","♝","♞","♜"]]
         self.white_turn = True
@@ -10,20 +12,52 @@ class Game:
         self.undo_stack=[]
         self.pieces_list=["♟","♙","♞","♘","♜","♖","♝","♗","♛","♕","♚","♔"]
         self.moves_list=[self.pawn_move,self.horse_move,self.rook_move,self.bishop_move,self.queen_move,self.king_move]
-    def move(self,x1,y1,x2,y2):
-        board=self.board
-        secondary_board=copy.deepcopy(board)
-        if board[x1][y1] in self.pieces_list:
-            white=False
-            if self.pieces_list.index(board[x1][y1])%2:
-                white=True
-            self.moves_list[(self.pieces_list.index(board[x1][y1]))//2](board,x1,y1,x2,y2,white)
-            if self.check():
-                print("Check")
-            if board!=secondary_board:
-                self.white_turn= not self.white_turn
-        else:
-            print("Not found")
+    def move(self, x1, y1, x2, y2):
+        response = MoveResponse(success=False,board=self.board,white_move=self.white_turn,check=False,checkmate=False,stalemate=False,state=0,)
+        board = self.board
+        secondary_state = [self.white_turn,self.White_queen_rook,self.White_king_rook,self.Black_queen_rook,self.Black_king_rook,]
+        secondary_board = copy.deepcopy(board)
+        previous_response = MoveResponse(success=False,board=secondary_board,white_move=self.white_turn,check=False,checkmate=False,stalemate=False,state=0,)
+        if not (0<=x1<8 and 0<=y1<8 and 0<=x2<8 and 0<=y2<8):
+            return previous_response
+        if board[x1][y1] not in self.pieces_list:
+            return previous_response
+        white = self.pieces_list.index(board[x1][y1]) % 2 == 1
+        if white != self.white_turn:
+            return previous_response
+        self.moves_list[(self.pieces_list.index(board[x1][y1])) // 2](board, x1, y1, x2, y2, white)
+        if board != secondary_board:
+            if self.king_in_check(self.board, white):
+                self.board=secondary_board
+                (self.white_turn,self.White_queen_rook,self.White_king_rook,self.Black_queen_rook,self.Black_king_rook,)=secondary_state
+                return previous_response
+            else:
+                self.promote()
+                response.success=True
+                self.white_turn = not self.white_turn 
+                self.check(response)
+                response.white_move = not response.white_move
+                if response.check:
+                    print("self.white_turn =", self.white_turn)
+
+                    kings = self.find_king(self.board)
+                    print("White king:", kings[0])
+                    print("Black king:", kings[1])
+
+                    x, y = kings[0] if self.white_turn else kings[1]
+                    print("Testing king:", x, y)
+
+                    attackers = self.find_attackers(self.board, self.white_turn, x, y)
+                    print("Attackers:", attackers)
+                    self.checkmate(response)
+                    if response.checkmate:
+                        response.state=2
+                else:
+                    if response.stalemate:
+                        response.state=1
+                response.board=self.board 
+                return response
+        return previous_response
     def ally_pieces(self,white):
         return "♔♕♗♘♙♖" if white else "♚♛♞♝♟♜"
     def print_board(self):
@@ -43,6 +77,12 @@ class Game:
         if board[x][y] in s1:
             return board[x][y],True
         return " ",False
+    def promote(self):
+        for i in range(8):
+            if self.board[0][i] == "♟":
+                self.board[0][i] = "♛"
+            elif self.board[7][i] == "♙":
+                self.board[7][i] = "♕"
     def pawn_move(self,board,x1,y1,x2,y2,white):
         first,set1,set2=1,2,1#first represent initial index as at that index pawn can move 2 squares set2 is thaat pawn might move 2 steps at beggining set1 is just a variable that makes white follow downward while black pawn follows upward path
         s1=self.ally_pieces(white)
@@ -177,22 +217,115 @@ class Game:
                     elif board[i][j]=="♚":
                         ans[1]=[i,j]
         return ans
-    def act_check(self,board,white,x,y):
+    def find_attackers(self, board, white, x, y):
+        print("Looking for attackers of", "White" if white else "Black")
+        for i in range(8):
+            for j in range(8):
+                if board[i][j] in self.ally_pieces(not white):
+                    print("Trying", board[i][j], "at", (i, j))
+        attackers = []
         for i in range(8):
             for j in range(8):
                 if board[i][j] in self.ally_pieces(not white):
                     temp = copy.deepcopy(board)
-                    self.moves_list[(self.pieces_list.index(board[i][j]))//2](temp,i,j,x,y,not white)
+                    self.moves_list[self.pieces_list.index(board[i][j])//2](temp,i,j,x,y,not white)
                     if temp[x][y]!=board[x][y]:
-                        return True
-        return False
-    def check(self):
-        ans=False
-        #tells if there is a check and who is under check
+                        attackers.append((i, j))
+        return attackers
+    def act_check(self, board, white, x, y):
+        return bool(self.find_attackers(board, white, x, y))
+    def check(self, response):
+        response.check = self.king_in_check(self.board, self.white_turn)
+    def king_in_check(self, board, white):
+        kings = self.find_king(board)
+        x, y = kings[0] if white else kings[1]
+        return self.act_check(board, white, x, y)
+    def save_state(self):
+        return (copy.deepcopy(self.board),self.white_turn,self.White_queen_rook,self.White_king_rook,self.Black_queen_rook,self.Black_king_rook,)
+    def restore_state(self, state):
+        (self.board,self.white_turn,self.White_queen_rook,self.White_king_rook,self.Black_queen_rook,self.Black_king_rook,)=state
+    def checkmate(self, response):
+        check_board=copy.deepcopy(self.board)
+        # 1. Can the king escape?
+        if self.king_can_escape(check_board):
+            return
+        # 2. Find all checking pieces
         kings = self.find_king(self.board)
-        for x,y in kings:
-            white=False
-            if self.board[x][y] in self.ally_pieces(True):
-                white=True
-            ans=ans or self.act_check(self.board,white,x,y)
-        return ans
+        x, y = kings[0] if self.white_turn else kings[1]
+        attackers = self.find_attackers(self.board, self.white_turn, x, y)
+        # 3. Double check
+        if len(attackers) > 1:
+            response.checkmate = True
+            return
+        ax, ay = attackers[0]
+        # 4. Can attacker be captured?
+        if self.can_any_piece_reach_square(ax, ay):
+            return
+        piece = self.board[ax][ay]
+        # 5. Knight/Pawn can't be blocked
+        if piece in "♞♘♟♙":
+            response.checkmate = True
+            return
+        # 6. Can attack be blocked?
+        if self.can_block_attack(ax, ay):
+            return
+        response.checkmate = True
+    def king_can_escape(self,check_board):
+        white = self.white_turn
+        kings = self.find_king(self.board)
+        x, y = kings[0] if white else kings[1]
+        state = self.save_state()
+        for dx in (-1, 0, 1):
+            for dy in (-1, 0, 1):
+                if dx == 0 and dy == 0:
+                    continue
+                nx = x + dx
+                ny = y + dy
+                if not (0 <= nx < 8 and 0 <= ny < 8):
+                    continue
+                self.restore_state(state)
+                self.king_move(self.board, x, y, nx, ny, white)
+                # Illegal king move
+                if self.board == state[0]:
+                    continue
+                # Escaped check
+                if not self.king_in_check(self.board, white):
+                    self.restore_state(state)
+                    return True
+        self.restore_state(state)
+        return False
+    def find_allies(self, board, white):
+        allies = []
+        for i in range(8):
+            for j in range(8):
+                if board[i][j] in self.ally_pieces(white):
+                    allies.append((i, j))
+        return allies
+    def can_any_piece_reach_square(self, ax, ay):
+        white = self.white_turn
+        allies = self.find_allies(self.board, white)
+        state = self.save_state()
+        for x, y in allies:
+            self.restore_state(state)
+            self.moves_list[(self.pieces_list.index(self.board[x][y]))//2](self.board,x,y,ax,ay,white)
+            if self.board == state[0]:
+                continue
+            if not self.king_in_check(self.board, white):
+                self.restore_state(state)
+                return True
+        self.restore_state(state)
+        return False
+    def can_block_attack(self, ax, ay):
+        white = self.white_turn
+        kings = self.find_king(self.board)
+        kx, ky = kings[0] if white else kings[1]
+        dx = 0 if ax == kx else (kx - ax) // abs(kx - ax)
+        dy = 0 if ay == ky else (ky - ay) // abs(ky - ay)
+        x = ax + dx
+        y = ay + dy
+        while (x, y) != (kx, ky):
+            if self.can_any_piece_reach_square(x, y):
+                return True
+            x += dx
+            y += dy
+        return False

@@ -1,5 +1,5 @@
 import random
-from act import Game
+from play_chess.act import Game
 
 class Room:
     def __init__(self, room_id, user1=None, user2=None):
