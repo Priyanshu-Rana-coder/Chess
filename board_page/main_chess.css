@@ -50,14 +50,15 @@ h1{
 
 
 .chess-board{
-    display: flex;
-    flex-direction: column;
+    width:min(640px,80vw);
+    aspect-ratio:1;
+    height:auto;
 
-    width: 640px;
-    height: 640px;
+    display:flex;
+    flex-direction:column;
 
-    border: 12px solid #5b3a1e;
-    box-shadow: 0 0 25px rgba(0,0,0,.5);
+    border:12px solid #5b3a1e;
+    box-shadow:0 0 25px rgba(0,0,0,.5);
 }
 
 .row{
@@ -97,9 +98,8 @@ h1{
 .square:active{
     transform: scale(.96);
 }
-
 .side-panel{
-    width: 260px;
+    width:min(260px,90vw);
 
     background: #3b2b1f;
     color: white;
