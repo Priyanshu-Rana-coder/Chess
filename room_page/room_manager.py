@@ -11,6 +11,7 @@ class Room:
         self.game = Game()
         self.started = False
         self.finished = False
+        self.draw_requests = set()
 
 class RoomManager:
     def __init__(self):

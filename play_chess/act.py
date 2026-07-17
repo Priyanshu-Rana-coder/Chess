@@ -38,17 +38,6 @@ class Game:
                 self.check(response)
                 response.white_move = not response.white_move
                 if response.check:
-                    print("self.white_turn =", self.white_turn)
-
-                    kings = self.find_king(self.board)
-                    print("White king:", kings[0])
-                    print("Black king:", kings[1])
-
-                    x, y = kings[0] if self.white_turn else kings[1]
-                    print("Testing king:", x, y)
-
-                    attackers = self.find_attackers(self.board, self.white_turn, x, y)
-                    print("Attackers:", attackers)
                     self.checkmate(response)
                     if response.checkmate:
                         response.state=2
@@ -218,11 +207,6 @@ class Game:
                         ans[1]=[i,j]
         return ans
     def find_attackers(self, board, white, x, y):
-        print("Looking for attackers of", "White" if white else "Black")
-        for i in range(8):
-            for j in range(8):
-                if board[i][j] in self.ally_pieces(not white):
-                    print("Trying", board[i][j], "at", (i, j))
         attackers = []
         for i in range(8):
             for j in range(8):
@@ -233,7 +217,7 @@ class Game:
                         attackers.append((i, j))
         return attackers
     def act_check(self, board, white, x, y):
-        return bool(self.find_attackers(board, white, x, y))
+        return bool(len(self.find_attackers(board, white, x, y))>0)
     def check(self, response):
         response.check = self.king_in_check(self.board, self.white_turn)
     def king_in_check(self, board, white):
@@ -249,49 +233,54 @@ class Game:
         # 1. Can the king escape?
         if self.king_can_escape(check_board):
             return
+        print(check_board)
         # 2. Find all checking pieces
-        kings = self.find_king(self.board)
+        kings = self.find_king(check_board)
         x, y = kings[0] if self.white_turn else kings[1]
-        attackers = self.find_attackers(self.board, self.white_turn, x, y)
+        attackers = self.find_attackers(check_board, self.white_turn, x, y)
+        print(check_board)
         # 3. Double check
         if len(attackers) > 1:
             response.checkmate = True
             return
+        
         ax, ay = attackers[0]
         # 4. Can attacker be captured?
-        if self.can_any_piece_reach_square(ax, ay):
+        if self.can_any_piece_reach_square(check_board, ax, ay):
             return
-        piece = self.board[ax][ay]
+        print(check_board)
+        piece = check_board[ax][ay]
         # 5. Knight/Pawn can't be blocked
         if piece in "♞♘♟♙":
             response.checkmate = True
             return
+        print(check_board)
         # 6. Can attack be blocked?
-        if self.can_block_attack(ax, ay):
+        if self.can_block_attack(check_board, ax, ay):
             return
+        print(check_board)
         response.checkmate = True
     def king_can_escape(self,check_board):
         white = self.white_turn
-        kings = self.find_king(self.board)
+        kings = self.find_king(check_board)
         x, y = kings[0] if white else kings[1]
         state = self.save_state()
         for dx in (-1, 0, 1):
             for dy in (-1, 0, 1):
-                if dx == 0 and dy == 0:
-                    continue
                 nx = x + dx
                 ny = y + dy
                 if not (0 <= nx < 8 and 0 <= ny < 8):
                     continue
-                self.restore_state(state)
-                self.king_move(self.board, x, y, nx, ny, white)
+                self.king_move(check_board, x, y, nx, ny, white)
                 # Illegal king move
-                if self.board == state[0]:
+                if check_board == state[0]:
                     continue
                 # Escaped check
-                if not self.king_in_check(self.board, white):
+                if not self.king_in_check(check_board, white):
                     self.restore_state(state)
+                    check_board=copy.deepcopy(state[0])
                     return True
+                check_board=copy.deepcopy(state[0])
         self.restore_state(state)
         return False
     def find_allies(self, board, white):
@@ -301,30 +290,32 @@ class Game:
                 if board[i][j] in self.ally_pieces(white):
                     allies.append((i, j))
         return allies
-    def can_any_piece_reach_square(self, ax, ay):
+    def can_any_piece_reach_square(self, check_board, ax, ay):
         white = self.white_turn
-        allies = self.find_allies(self.board, white)
+        allies = self.find_allies(check_board, white)
         state = self.save_state()
         for x, y in allies:
             self.restore_state(state)
-            self.moves_list[(self.pieces_list.index(self.board[x][y]))//2](self.board,x,y,ax,ay,white)
-            if self.board == state[0]:
+            self.moves_list[(self.pieces_list.index(check_board[x][y]))//2](check_board,x,y,ax,ay,white)
+            if check_board == state[0]:
                 continue
-            if not self.king_in_check(self.board, white):
+            if not self.king_in_check(check_board, white):
                 self.restore_state(state)
+                check_board=copy.deepcopy(state[0])
                 return True
+            check_board=copy.deepcopy(state[0])
         self.restore_state(state)
         return False
-    def can_block_attack(self, ax, ay):
+    def can_block_attack(self,check_board,  ax, ay):
         white = self.white_turn
-        kings = self.find_king(self.board)
+        kings = self.find_king(check_board)
         kx, ky = kings[0] if white else kings[1]
         dx = 0 if ax == kx else (kx - ax) // abs(kx - ax)
         dy = 0 if ay == ky else (ky - ay) // abs(ky - ay)
         x = ax + dx
         y = ay + dy
         while (x, y) != (kx, ky):
-            if self.can_any_piece_reach_square(x, y):
+            if self.can_any_piece_reach_square(check_board, x, y):
                 return True
             x += dx
             y += dy

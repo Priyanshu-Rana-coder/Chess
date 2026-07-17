@@ -12,6 +12,17 @@ document.getElementById("room-id").textContent = `Room ID : ${roomId}`;
 
 const socket = new WebSocket(`ws://127.0.0.1:8000/ws/${roomId}?token=${user.token}`);
 
+const drawBtn = document.getElementById("draw-btn");
+const resignBtn = document.getElementById("resign-btn");
+const board = document.querySelector(".chess-board");
+const flipBtn = document.getElementById("flip-btn");
+const status = document.getElementById("game-status");
+
+let drawRequested = false;
+let flipped = false;
+let selectedSquare = null;
+let selectedElement = null;
+
 function drawBoard(board) {
     for (let i = 0; i < 8; i++)
         for (let j = 0; j < 8; j++)
@@ -38,14 +49,35 @@ socket.onmessage = function(event) {
         return;
     }
 
+    if (data.type === "draw_offer") {
+        drawRequested = true;
+        drawBtn.style.background = "linear-gradient(to right, #4caf50 50%, #ffcc00 50%)";
+        status.textContent = "Opponent offered a draw";
+        return;
+    }
+
+    if (data.type === "draw") {
+        drawRequested = false;
+        drawBtn.style.background = "";
+        status.textContent = "Game Drawn by Agreement";
+        return;
+    }
+
+    if (data.type === "resign") {
+        drawRequested = false;
+        drawBtn.style.background = "";
+        status.textContent = data.winner === user.username ? "You Win by Resignation" : "You Lose by Resignation";
+        return;
+    }
+
     if (!data.success) {
         console.log("Illegal Move");
         return;
     }
 
+    drawRequested = false;
+    drawBtn.style.background = "";
     drawBoard(data.board);
-
-    const status = document.getElementById("game-status");
 
     if (data.checkmate)
         status.textContent = data.white_move ? "Black Wins by Checkmate" : "White Wins by Checkmate";
@@ -59,8 +91,22 @@ socket.onmessage = function(event) {
     console.log(data);
 };
 
-let selectedSquare = null;
-let selectedElement = null;
+drawBtn.addEventListener("click", function() {
+    console.log("Draw clicked", socket.readyState);
+    if (socket.readyState !== WebSocket.OPEN)
+        return;
+    console.log("Sending draw");
+    socket.send(JSON.stringify({ draw: true }));
+    drawBtn.style.background = "linear-gradient(to right, #4caf50 50%, #ffcc00 50%)";
+});
+
+resignBtn.addEventListener("click", function() {
+    if (socket.readyState !== WebSocket.OPEN)
+        return;
+
+    if (confirm("Are you sure you want to resign?"))
+        socket.send(JSON.stringify({ resign: true }));
+});
 
 const squares = document.querySelectorAll(".square");
 
@@ -75,10 +121,7 @@ squares.forEach(square => {
             return;
         }
 
-        const move = {
-            from: selectedSquare,
-            to: [x, y]
-        };
+        const move = { from: selectedSquare, to: [x, y] };
 
         console.log("Sending:", move);
 
@@ -90,11 +133,6 @@ squares.forEach(square => {
         selectedElement = null;
     });
 });
-
-const board = document.querySelector(".chess-board");
-const flipBtn = document.getElementById("flip-btn");
-
-let flipped = false;
 
 flipBtn.addEventListener("click", function() {
     flipped = !flipped;
