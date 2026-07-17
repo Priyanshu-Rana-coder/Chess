@@ -10,7 +10,7 @@ document.getElementById("draws").textContent = `🤝 ${user.draws}`;
 
 const createRoomBtn = document.getElementById("create-room-btn");
 createRoomBtn.addEventListener("click", async function () {
-    const response = await fetch("http://127.0.0.1:8000/room/create", {
+    const response = await fetch("https://chess-production-7d07.up.railway.app/room/create", {
         method: "POST",
         headers: {
             "Authorization": `Bearer ${user.token}`
@@ -25,7 +25,7 @@ createRoomBtn.addEventListener("click", async function () {
 const joinRoomBtn = document.getElementById("join-room-btn");
 joinRoomBtn.addEventListener("click", async function () {
     const roomId = document.getElementById("join-room").value.trim();
-    const response = await fetch("http://127.0.0.1:8000/room/join", {
+    const response = await fetch("https://chess-production-7d07.up.railway.app/room/join", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

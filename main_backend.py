@@ -19,6 +19,7 @@ app.add_middleware(
         "http://localhost:3002",
         "http://127.0.0.1:5500",
         "http://localhost:5500",
+        "https://priyanshu-rana-coder.github.io",
     ],
     allow_credentials=True,
     allow_methods=["*"],

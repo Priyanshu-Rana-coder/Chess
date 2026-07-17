@@ -8,7 +8,7 @@ form.addEventListener("submit", async function (event) {
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value;
     try {
-        const response = await fetch("http://127.0.0.1:8000/user/login", {
+        const response = await fetch("https://chess-production-7d07.up.railway.app/user/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

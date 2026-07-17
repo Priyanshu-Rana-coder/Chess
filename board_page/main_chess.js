@@ -10,7 +10,7 @@ if (!roomId)
 
 document.getElementById("room-id").textContent = `Room ID : ${roomId}`;
 
-const socket = new WebSocket(`ws://127.0.0.1:8000/ws/${roomId}?token=${user.token}`);
+const socket = new WebSocket(`wss://chess-production-7d07.up.railway.app//ws/${roomId}?token=${user.token}`);
 
 const drawBtn = document.getElementById("draw-btn");
 const resignBtn = document.getElementById("resign-btn");
