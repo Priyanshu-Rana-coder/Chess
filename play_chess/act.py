@@ -296,6 +296,7 @@ class Game:
         state = self.save_state()
         for x, y in allies:
             self.restore_state(state)
+            check_board = copy.deepcopy(state[0])
             self.moves_list[(self.pieces_list.index(check_board[x][y]))//2](check_board,x,y,ax,ay,white)
             if check_board == state[0]:
                 continue

@@ -85,10 +85,10 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str):
                 if room.black_socket is not None:
                     await room.black_socket.send_json({"type": "draw"})
 
-                await asyncio.sleep(5)
+                    await asyncio.sleep(5)
 
-                MANAGER.delete_room(room.room_id)
-                return
+                    MANAGER.delete_room(room.room_id)
+                    return
 
                 if username == room.white["username"]:
                     opponent = room.black_socket
@@ -107,7 +107,6 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str):
                 continue
 
             response = room.game.move(data["from"][0], data["from"][1], data["to"][0], data["to"][1])
-
             if response.success:
                 room.draw_requests.clear()
 
@@ -150,6 +149,9 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str):
 
                 MANAGER.delete_room(room.room_id)
                 return
+    except Exception as e:
+        print(type(e), e)
+        raise
 
     except WebSocketDisconnect:
         if room.finished:

@@ -33,8 +33,9 @@ socket.onopen = function() {
     console.log("Connected to websocket");
 };
 
-socket.onclose = function() {
+socket.onclose = function(event) {
     console.log("Disconnected");
+    console.log(event.code, event.reason, event.wasClean);
 };
 
 socket.onerror = function(error) {
