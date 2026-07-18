@@ -93,17 +93,23 @@ h1{
     flex: 1;
 }
 
-.square{
+.square {
     flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    margin: 0;
     border: none;
     outline: none;
-
+    appearance: none;
+    -webkit-appearance: none;
     font-size: 52px;
-
+    line-height: 1;
+    font-family: "Segoe UI Symbol", "Arial Unicode MS", sans-serif;
+    overflow: hidden;
     cursor: pointer;
     user-select: none;
-
-    transition: .15s;
 }
 
 .light{
