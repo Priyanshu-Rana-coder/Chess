@@ -226,6 +226,9 @@ class Game:
         kings = self.find_king(check_board)
         x, y = kings[0] if self.white_turn else kings[1]
         attackers = self.find_attackers(check_board, self.white_turn, x, y)
+        print("This checkboard")
+        print(check_board)
+        print(attackers)
         # 2. Can the king escape?
         self.print_board_debug("self.board", self.board)
         self.print_board_debug("check_board", check_board)
