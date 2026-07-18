@@ -149,9 +149,6 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str):
 
                 MANAGER.delete_room(room.room_id)
                 return
-    except Exception as e:
-        print(type(e), e)
-        raise
 
     except WebSocketDisconnect:
         if room.finished:
@@ -172,5 +169,8 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str):
         loser_user.losses += 1
         db.commit()
         MANAGER.delete_room(room.room_id)
+    except Exception as e:
+        print(type(e), e)
+        raise
     finally:
         db.close()

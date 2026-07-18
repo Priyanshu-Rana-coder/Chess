@@ -11,6 +11,9 @@ A full-stack real-time multiplayer chess platform featuring a **custom-built che
 - ☁️ Fully deployed full-stack application
 - 📊 Persistent player statistics stored in PostgreSQL
 
+## Demo
+
+<img src="Recording.gif" width="900">
 
 ## Features
 
