@@ -12,6 +12,10 @@ class Game:
         self.undo_stack=[]
         self.pieces_list=["♟","♙","♞","♘","♜","♖","♝","♗","♛","♕","♚","♔"]
         self.moves_list=[self.pawn_move,self.horse_move,self.rook_move,self.bishop_move,self.queen_move,self.king_move]
+    def print_board_debug(name, board):
+        print(f"\n{name} id={id(board)}")
+        for row in board:
+            print(row)
     def move(self, x1, y1, x2, y2):
         response = MoveResponse(success=False,board=self.board,white_move=self.white_turn,check=False,checkmate=False,stalemate=False,state=0,)
         board = self.board
@@ -231,14 +235,18 @@ class Game:
     def checkmate(self, response):
         check_board=copy.deepcopy(self.board)
         # 1. Can the king escape?
+        self.print_board_debug("self.board", self.board)
+        self.print_board_debug("check_board", check_board)
         if self.king_can_escape(check_board):
             return
-        print(check_board)
+        self.print_board_debug("self.board", self.board)
+        self.print_board_debug("check_board", check_board)
         # 2. Find all checking pieces
         kings = self.find_king(check_board)
         x, y = kings[0] if self.white_turn else kings[1]
         attackers = self.find_attackers(check_board, self.white_turn, x, y)
-        print(check_board)
+        self.print_board_debug("self.board", self.board)
+        self.print_board_debug("check_board", check_board)
         # 3. Double check
         if len(attackers) > 1:
             response.checkmate = True
@@ -248,17 +256,20 @@ class Game:
         # 4. Can attacker be captured?
         if self.can_any_piece_reach_square(check_board, ax, ay):
             return
-        print(check_board)
+        self.print_board_debug("self.board", self.board)
+        self.print_board_debug("check_board", check_board)
         piece = check_board[ax][ay]
         # 5. Knight/Pawn can't be blocked
         if piece in "♞♘♟♙":
             response.checkmate = True
             return
-        print(check_board)
+        self.print_board_debug("self.board", self.board)
+        self.print_board_debug("check_board", check_board)
         # 6. Can attack be blocked?
         if self.can_block_attack(check_board, ax, ay):
             return
-        print(check_board)
+        self.print_board_debug("self.board", self.board)
+        self.print_board_debug("check_board", check_board)
         response.checkmate = True
     def king_can_escape(self,check_board):
         white = self.white_turn
@@ -298,17 +309,6 @@ class Game:
             self.restore_state(state)
             check_board = copy.deepcopy(state[0])
             piece = check_board[x][y]
-            if piece == " ":
-                print("EMPTY FOUND")
-                print("coords:", x, y)
-                print("allies:", allies)
-                print("check_board:")
-                for row in check_board:
-                    print(row)
-                print("saved board:")
-                for row in state[0]:
-                    print(row)
-                raise Exception("empty square")
             self.moves_list[self.pieces_list.index(piece)//2](check_board, x, y, ax, ay, white)
             if check_board == state[0]:
                 continue
