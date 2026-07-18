@@ -53,18 +53,6 @@ class Game:
         return previous_response
     def ally_pieces(self,white):
         return "♔♕♗♘♙♖" if white else "♚♛♞♝♟♜"
-    def print_board(self):
-        for i in range(0,8):
-            print(f"\t{i}\t",end='')
-        print("")
-        temp=0
-        for i in self.board:
-            print("---------------------------------------------------------------------------------------------------------------------------------")
-            for j in i:
-                print(f"|\t{j}\t",end='')
-            print(f"|{temp}")
-            temp+=1
-        print("---------------------------------------------------------------------------------------------------------------------------------")
     def finder(self,board,x,y,white):
         s1=self.ally_pieces(white)
         if board[x][y] in s1:
@@ -234,17 +222,15 @@ class Game:
         (self.board,self.white_turn,self.White_queen_rook,self.White_king_rook,self.Black_queen_rook,self.Black_king_rook,)=state
     def checkmate(self, response):
         check_board=copy.deepcopy(self.board)
-        # 1. Can the king escape?
+        #1 Find all attackers
+        kings = self.find_king(check_board)
+        x, y = kings[0] if self.white_turn else kings[1]
+        attackers = self.find_attackers(check_board, self.white_turn, x, y)
+        # 2. Can the king escape?
         self.print_board_debug("self.board", self.board)
         self.print_board_debug("check_board", check_board)
         if self.king_can_escape(check_board):
             return
-        self.print_board_debug("self.board", self.board)
-        self.print_board_debug("check_board", check_board)
-        # 2. Find all checking pieces
-        kings = self.find_king(check_board)
-        x, y = kings[0] if self.white_turn else kings[1]
-        attackers = self.find_attackers(check_board, self.white_turn, x, y)
         self.print_board_debug("self.board", self.board)
         self.print_board_debug("check_board", check_board)
         # 3. Double check
