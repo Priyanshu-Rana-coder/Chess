@@ -64,7 +64,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str):
                 if room.black_socket is not None:
                     await room.black_socket.send_json({"type": "resign", "winner": winner})
 
-                await asyncio.sleep(0.3)
+                await asyncio.sleep(5)
 
                 MANAGER.delete_room(room.room_id)
                 return
@@ -85,7 +85,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str):
                 if room.black_socket is not None:
                     await room.black_socket.send_json({"type": "draw"})
 
-                await asyncio.sleep(0.3)
+                await asyncio.sleep(5)
 
                 MANAGER.delete_room(room.room_id)
                 return
@@ -130,7 +130,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str):
                 winner_user.wins += 1
                 loser_user.losses += 1
                 db.commit()
-                await asyncio.sleep(0.3)
+                await asyncio.sleep(5)
 
                 MANAGER.delete_room(room.room_id)
                 return
@@ -146,7 +146,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str):
 
                 db.commit()
 
-                await asyncio.sleep(0.3)
+                await asyncio.sleep(5)
 
                 MANAGER.delete_room(room.room_id)
                 return
