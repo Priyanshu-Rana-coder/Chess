@@ -12,7 +12,7 @@ class Game:
         self.undo_stack=[]
         self.pieces_list=["♟","♙","♞","♘","♜","♖","♝","♗","♛","♕","♚","♔"]
         self.moves_list=[self.pawn_move,self.horse_move,self.rook_move,self.bishop_move,self.queen_move,self.king_move]
-    def print_board_debug(name, board):
+    def print_board_debug(self,name, board):
         print(f"\n{name} id={id(board)}")
         for row in board:
             print(row)
