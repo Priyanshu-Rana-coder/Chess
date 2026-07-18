@@ -12,7 +12,7 @@ class Game:
         self.undo_stack=[]
         self.pieces_list=["♟","♙","♞","♘","♜","♖","♝","♗","♛","♕","♚","♔"]
         self.moves_list=[self.pawn_move,self.horse_move,self.rook_move,self.bishop_move,self.queen_move,self.king_move]
-    def print_board_debug(self,name, board):
+    def print_board_debug(self, name, board):
         print(f"\n{name} id={id(board)}")
         for row in board:
             print(row)
@@ -309,6 +309,17 @@ class Game:
             self.restore_state(state)
             check_board = copy.deepcopy(state[0])
             piece = check_board[x][y]
+            if piece == " ":
+                print("EMPTY FOUND")
+                print("coords:", x, y)
+                print("allies:", allies)
+                print("check_board:")
+                for row in check_board:
+                    print(row)
+                print("saved board:")
+                for row in state[0]:
+                    print(row)
+                raise Exception("empty square")
             self.moves_list[self.pieces_list.index(piece)//2](check_board, x, y, ax, ay, white)
             if check_board == state[0]:
                 continue
