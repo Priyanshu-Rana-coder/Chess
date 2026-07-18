@@ -265,22 +265,23 @@ class Game:
         kings = self.find_king(check_board)
         x, y = kings[0] if white else kings[1]
         state = self.save_state()
+        new_board=copy.deepcopy(check_board)
         for dx in (-1, 0, 1):
             for dy in (-1, 0, 1):
                 nx = x + dx
                 ny = y + dy
                 if not (0 <= nx < 8 and 0 <= ny < 8):
                     continue
-                self.king_move(check_board, x, y, nx, ny, white)
+                self.king_move(new_board, x, y, nx, ny, white)
                 # Illegal king move
-                if check_board == state[0]:
+                if new_board == state[0]:
                     continue
                 # Escaped check
-                if not self.king_in_check(check_board, white):
+                if not self.king_in_check(new_board, white):
                     self.restore_state(state)
-                    check_board=copy.deepcopy(state[0])
+                    new_board=copy.deepcopy(state[0])
                     return True
-                check_board=copy.deepcopy(state[0])
+                new_board=copy.deepcopy(state[0])
         self.restore_state(state)
         return False
     def find_allies(self, board, white):
