@@ -297,7 +297,19 @@ class Game:
         for x, y in allies:
             self.restore_state(state)
             check_board = copy.deepcopy(state[0])
-            self.moves_list[(self.pieces_list.index(check_board[x][y]))//2](check_board,x,y,ax,ay,white)
+            piece = check_board[x][y]
+            if piece == " ":
+                print("EMPTY FOUND")
+                print("coords:", x, y)
+                print("allies:", allies)
+                print("check_board:")
+                for row in check_board:
+                    print(row)
+                print("saved board:")
+                for row in state[0]:
+                    print(row)
+                raise Exception("empty square")
+            self.moves_list[self.pieces_list.index(piece)//2](check_board, x, y, ax, ay, white)
             if check_board == state[0]:
                 continue
             if not self.king_in_check(check_board, white):
