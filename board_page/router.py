@@ -3,7 +3,7 @@ from User.auth import verify_token
 from room_page.room_manager import MANAGER
 from User.database import SessionLocal
 from User.models import User
-
+import asyncio
 router = APIRouter()
 
 @router.websocket("/ws/{room_id}")
@@ -64,29 +64,31 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str):
                 if room.black_socket is not None:
                     await room.black_socket.send_json({"type": "resign", "winner": winner})
 
+                await asyncio.sleep(0.3)
+
                 MANAGER.delete_room(room.room_id)
-                break
-            elif "draw" in data:
-                room.draw_requests.add(username)
-                if len(room.draw_requests) == 2:
-                    room.finished = True
+                return
+            if len(room.draw_requests) == 2:
+                room.finished = True
 
-                    white_user = db.query(User).filter(User.username == room.white["username"]).first()
-                    black_user = db.query(User).filter(User.username == room.black["username"]).first()
+                white_user = db.query(User).filter(User.username == room.white["username"]).first()
+                black_user = db.query(User).filter(User.username == room.black["username"]).first()
 
-                    white_user.draws += 1
-                    black_user.draws += 1
+                white_user.draws += 1
+                black_user.draws += 1
 
-                    db.commit()
+                db.commit()
 
-                    if room.white_socket is not None:
-                        await room.white_socket.send_json({"type": "draw"})
+                if room.white_socket is not None:
+                    await room.white_socket.send_json({"type": "draw"})
 
-                    if room.black_socket is not None:
-                        await room.black_socket.send_json({"type": "draw"})
+                if room.black_socket is not None:
+                    await room.black_socket.send_json({"type": "draw"})
 
-                    MANAGER.delete_room(room.room_id)
-                    break
+                await asyncio.sleep(0.3)
+
+                MANAGER.delete_room(room.room_id)
+                return
 
                 if username == room.white["username"]:
                     opponent = room.black_socket
@@ -117,24 +119,21 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str):
 
             if response.checkmate:
                 room.finished = True
-
                 if room.game.white_turn:
                     winner = room.black["username"]
                     loser = room.white["username"]
                 else:
                     winner = room.white["username"]
                     loser = room.black["username"]
-
                 winner_user = db.query(User).filter(User.username == winner).first()
                 loser_user = db.query(User).filter(User.username == loser).first()
-
                 winner_user.wins += 1
                 loser_user.losses += 1
-
                 db.commit()
+                await asyncio.sleep(0.3)
 
                 MANAGER.delete_room(room.room_id)
-                break
+                return
 
             elif response.stalemate:
                 room.finished = True
@@ -147,14 +146,14 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, token: str):
 
                 db.commit()
 
+                await asyncio.sleep(0.3)
+
                 MANAGER.delete_room(room.room_id)
-                break
+                return
 
     except WebSocketDisconnect:
-
         if room.finished:
             return
-
         room.finished = True
 
         if room.white_socket == websocket:
